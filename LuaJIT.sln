@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33627.172
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LuaJIT", "LuaJIT.vcxproj", "{75291FBF-5A09-4767-AFEA-8C6B025BF5D4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{88ABA852-E15D-475D-9ED9-93DBA23C2388} = {88ABA852-E15D-475D-9ED9-93DBA23C2388}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "minilua", "minilua.vcxproj", "{B3716555-F739-4069-BB66-C563C3969629}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "buildvm", "buildvm.vcxproj", "{88ABA852-E15D-475D-9ED9-93DBA23C2388}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B3716555-F739-4069-BB66-C563C3969629} = {B3716555-F739-4069-BB66-C563C3969629}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{75291FBF-5A09-4767-AFEA-8C6B025BF5D4}.Debug|x64.ActiveCfg = Debug|x64
+		{75291FBF-5A09-4767-AFEA-8C6B025BF5D4}.Debug|x64.Build.0 = Debug|x64
+		{75291FBF-5A09-4767-AFEA-8C6B025BF5D4}.Debug|x86.ActiveCfg = Debug|x64
+		{75291FBF-5A09-4767-AFEA-8C6B025BF5D4}.Release|x64.ActiveCfg = Release|x64
+		{75291FBF-5A09-4767-AFEA-8C6B025BF5D4}.Release|x64.Build.0 = Release|x64
+		{75291FBF-5A09-4767-AFEA-8C6B025BF5D4}.Release|x86.ActiveCfg = Release|x64
+		{B3716555-F739-4069-BB66-C563C3969629}.Debug|x64.ActiveCfg = Debug|x64
+		{B3716555-F739-4069-BB66-C563C3969629}.Debug|x64.Build.0 = Debug|x64
+		{B3716555-F739-4069-BB66-C563C3969629}.Debug|x86.ActiveCfg = Debug|x64
+		{B3716555-F739-4069-BB66-C563C3969629}.Release|x64.ActiveCfg = Release|x64
+		{B3716555-F739-4069-BB66-C563C3969629}.Release|x64.Build.0 = Release|x64
+		{B3716555-F739-4069-BB66-C563C3969629}.Release|x86.ActiveCfg = Release|x64
+		{88ABA852-E15D-475D-9ED9-93DBA23C2388}.Debug|x64.ActiveCfg = Debug|x64
+		{88ABA852-E15D-475D-9ED9-93DBA23C2388}.Debug|x64.Build.0 = Debug|x64
+		{88ABA852-E15D-475D-9ED9-93DBA23C2388}.Debug|x86.ActiveCfg = Debug|x64
+		{88ABA852-E15D-475D-9ED9-93DBA23C2388}.Debug|x86.Build.0 = Debug|x64
+		{88ABA852-E15D-475D-9ED9-93DBA23C2388}.Release|x64.ActiveCfg = Release|x64
+		{88ABA852-E15D-475D-9ED9-93DBA23C2388}.Release|x64.Build.0 = Release|x64
+		{88ABA852-E15D-475D-9ED9-93DBA23C2388}.Release|x86.ActiveCfg = Release|x64
+		{88ABA852-E15D-475D-9ED9-93DBA23C2388}.Release|x86.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {79921900-8800-43DE-92A2-E7F899A7EBA9}
+	EndGlobalSection
+EndGlobal
