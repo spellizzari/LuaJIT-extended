@@ -514,7 +514,14 @@ static void expr_toreg_nobranch(FuncState *fs, ExpDesc *e, BCReg reg)
   BCIns ins;
   expr_discharge(fs, e);
   if (e->k == VKSTR) {
-    ins = BCINS_AD(BC_KSTR, reg, const_str(fs, e));
+    BCReg k = const_str(fs, e);
+    if (k > BCMAX_D) {
+        bcemit_AD(fs, BC_KINTLO, reg, k & 0xffff);
+        ins = BCINS_AD(BC_KSTRHI, reg, k >> 16);
+    }
+    else {
+        ins = BCINS_AD(BC_KSTR, reg, k);
+    }
   } else if (e->k == VKNUM) {
 #if LJ_DUALNUM
     cTValue *tv = expr_numtv(e);
@@ -528,7 +535,16 @@ static void expr_toreg_nobranch(FuncState *fs, ExpDesc *e, BCReg reg)
       ins = BCINS_AD(BC_KSHORT, reg, (BCReg)(uint16_t)k);
     else
 #endif
-      ins = BCINS_AD(BC_KNUM, reg, const_num(fs, e));
+    {
+        if ((fs->flags & PROTO_NOJIT) || fs->nkn >= BCMAX_D) {
+            fs->flags |= PROTO_NOJIT;
+            bcemit_AD(fs, BC_KINTLO, reg, k & 0xffff);
+            ins = BCINS_AD(BC_KINTHI, reg, k >> 16);
+        }
+        else {
+            ins = BCINS_AD(BC_KNUM, reg, const_num(fs, e));
+        }
+    }
 #if LJ_HASFFI
   } else if (e->k == VKCDATA) {
     fs->flags |= PROTO_FFI;
@@ -678,7 +694,12 @@ static void bcemit_method(FuncState *fs, ExpDesc *e, ExpDesc *key)
     bcemit_ABC(fs, BC_TGETS, func, obj, idx);
   } else {
     bcreg_reserve(fs, 3+LJ_FR2);
-    bcemit_AD(fs, BC_KSTR, func+2+LJ_FR2, idx);
+    if (idx <= BCMAX_D) {
+        bcemit_AD(fs, BC_KSTR, func + 2 + LJ_FR2, idx);
+    } else {
+      bcemit_AD(fs, BC_KINTLO, func + 2 + LJ_FR2, idx & 0xffff);
+      bcemit_AD(fs, BC_KSTRHI, func + 2 + LJ_FR2, idx >> 16);
+    }
     bcemit_ABC(fs, BC_TGETV, func, obj, func+2+LJ_FR2);
     fs->freereg--;
   }
@@ -1357,8 +1378,8 @@ static void fs_fixup_k(FuncState *fs, GCproto *pt, void *kptr)
   TValue *array;
   Node *node;
   MSize i, hmask;
-  checklimitgt(fs, fs->nkn, BCMAX_D+1, "constants");
-  checklimitgt(fs, fs->nkgc, BCMAX_D+1, "constants");
+  checklimitgt(fs, fs->nkn, 0xFFFFFFFF/*BCMAX_D+1*/, "constants");
+  checklimitgt(fs, fs->nkgc, 0xFFFFFFFF, "constants");
   setmref(pt->k, kptr);
   pt->sizekn = fs->nkn;
   pt->sizekgc = fs->nkgc;
@@ -1726,6 +1747,7 @@ static void expr_table(LexState *ls, ExpDesc *e)
   uint32_t nhash = 0;  /* Number of hash entries. */
   BCReg freg = fs->freereg;
   BCPos pc = bcemit_AD(fs, BC_TNEW, freg, 0);
+  BCPos pc2;
   expr_init(e, VNONRELOC, freg);
   bcreg_reserve(fs, 1);
   freg++;
@@ -1754,10 +1776,22 @@ static void expr_table(LexState *ls, ExpDesc *e)
 	(key.k == VKSTR || expr_isk_nojump(&val))) {
       TValue k, *v;
       if (!t) {  /* Create template table on demand. */
-	BCReg kidx;
-	t = lj_tab_new(fs->L, needarr ? narr : 0, hsize2hbits(nhash));
-	kidx = const_gc(fs, obj2gco(t), LJ_TTAB);
-	fs->bcbase[pc].ins = BCINS_AD(BC_TDUP, freg-1, kidx);
+	    BCReg kidx;
+	    t = lj_tab_new(fs->L, needarr ? narr : 0, hsize2hbits(nhash));
+	    kidx = const_gc(fs, obj2gco(t), LJ_TTAB);
+        if (fs->nkgc < BCMAX_D) {
+            fs->bcbase[pc].ins = BCINS_AD(BC_TDUP, freg - 1, kidx);
+        }
+        else {
+            fs->bcbase[pc].ins = BCINS_AD(BC_KINTLO, freg - 1, kidx & 0xffff);
+            bcemit_INS(fs, 0);
+            for (BCPos p = fs->pc - 1; p > pc + 1; --p) {
+                fs->bcbase[p] = fs->bcbase[p - 1];
+            }
+            fs->bcbase[pc + 1] = fs->bcbase[pc];
+            fs->bcbase[pc + 1].ins = BCINS_AD(BC_TDUPHI, freg - 1, kidx >> 16);
+            fs->flags |= PROTO_NOJIT;
+        }
       }
       vcall = 0;
       expr_kvalue(fs, &k, &key);
