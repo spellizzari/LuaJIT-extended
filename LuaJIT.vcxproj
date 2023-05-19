@@ -96,7 +96,8 @@ $(SolutionDir)bin\$(Platform)\$(Configuration)\buildvm.exe -m folddef -o lj_fold
       <Inputs>$(SolutionDir)src\host\buildvm_arch.h;$(SolutionDir)src\lib_base.c;$(SolutionDir)src\lib_math.c;$(SolutionDir)src\lib_bit.c;$(SolutionDir)src\lib_string.c;$(SolutionDir)src\lib_table.c;$(SolutionDir)src\lib_io.c;$(SolutionDir)src\lib_os.c;$(SolutionDir)src\lib_package.c;$(SolutionDir)src\lib_debug.c;$(SolutionDir)src\lib_jit.c;$(SolutionDir)src\lib_ffi.c;$(SolutionDir)src\lib_buffer.c;$(SolutionDir)src\lj_opt_fold.c;%(Inputs)</Inputs>
     </CustomBuildStep>
     <PostBuildEvent>
-      <Command>xcopy /y $(SolutionDir)src\jit\ $(TargetDir)jit\</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -115,10 +116,6 @@ $(SolutionDir)bin\$(Platform)\$(Configuration)\buildvm.exe -m folddef -o lj_fold
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>lj_vm.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PreBuildEvent>
-      <Command>
-      </Command>
-    </PreBuildEvent>
     <CustomBuildStep>
       <Command>cd $(SolutionDir)src
 del *.obj lj_bcdef.h lj_ffdef.h lj_libdef.h lj_recdef.h lj_folddef.h
@@ -130,14 +127,8 @@ $(SolutionDir)bin\$(Platform)\$(Configuration)\buildvm.exe -m libdef -o lj_libde
 $(SolutionDir)bin\$(Platform)\$(Configuration)\buildvm.exe -m recdef -o lj_recdef.h %ALL_LIB%
 $(SolutionDir)bin\$(Platform)\$(Configuration)\buildvm.exe -m vmdef -o jit\vmdef.lua %ALL_LIB%
 $(SolutionDir)bin\$(Platform)\$(Configuration)\buildvm.exe -m folddef -o lj_folddef.h lj_opt_fold.c</Command>
-    </CustomBuildStep>
-    <CustomBuildStep>
       <Message>buildvm</Message>
-    </CustomBuildStep>
-    <CustomBuildStep>
       <Outputs>$(SolutionDir)src\lj_vm.obj;$(SolutionDir)src\lj_bcdef.h;$(SolutionDir)src\lj_ffdef.h;$(SolutionDir)src\lj_libdef.h;$(SolutionDir)src\lj_recdef.h;$(SolutionDir)src\jit\vmdef.lua;$(SolutionDir)src\lj_folddef.h;%(Outputs)</Outputs>
-    </CustomBuildStep>
-    <CustomBuildStep>
       <Inputs>$(SolutionDir)src\host\buildvm_arch.h;$(SolutionDir)src\lib_base.c;$(SolutionDir)src\lib_math.c;$(SolutionDir)src\lib_bit.c;$(SolutionDir)src\lib_string.c;$(SolutionDir)src\lib_table.c;$(SolutionDir)src\lib_io.c;$(SolutionDir)src\lib_os.c;$(SolutionDir)src\lib_package.c;$(SolutionDir)src\lib_debug.c;$(SolutionDir)src\lib_jit.c;$(SolutionDir)src\lib_ffi.c;$(SolutionDir)src\lib_buffer.c;$(SolutionDir)src\lj_opt_fold.c;%(Inputs)</Inputs>
     </CustomBuildStep>
     <PostBuildEvent>
@@ -297,7 +288,34 @@ $(SolutionDir)bin\$(Platform)\$(Configuration)\buildvm.exe -m folddef -o lj_fold
     <ClInclude Include="src\luajit.h" />
     <ClInclude Include="src\lualib.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="src\jit\bc.lua" />
+    <None Include="src\jit\bcsave.lua" />
+    <None Include="src\jit\dis_arm.lua" />
+    <None Include="src\jit\dis_arm64.lua" />
+    <None Include="src\jit\dis_arm64be.lua" />
+    <None Include="src\jit\dis_mips.lua" />
+    <None Include="src\jit\dis_mips64.lua" />
+    <None Include="src\jit\dis_mips64el.lua" />
+    <None Include="src\jit\dis_mips64r6.lua" />
+    <None Include="src\jit\dis_mips64r6el.lua" />
+    <None Include="src\jit\dis_mipsel.lua" />
+    <None Include="src\jit\dis_ppc.lua" />
+    <None Include="src\jit\dis_x64.lua" />
+    <None Include="src\jit\dis_x86.lua" />
+    <None Include="src\jit\dump.lua" />
+    <None Include="src\jit\p.lua" />
+    <None Include="src\jit\v.lua" />
+    <None Include="src\jit\vmdef.lua" />
+    <None Include="src\jit\zone.lua" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <Target Name="CopyJitFolder" AfterTargets="Build" Inputs="@(None)" Outputs="@(None->'$(OutputPath)%(filename)%(extension)')">
+    <Copy SourceFiles="@(None)" DestinationFolder="$(OutputPath)jit\"/>
+  </Target>
+  <ItemGroup>
+    <UpToDateCheckInput Include="@(None)"/>
+  </ItemGroup>
 </Project>
