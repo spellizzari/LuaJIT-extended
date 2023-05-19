@@ -3617,7 +3617,6 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  jmp <2
     break;
 
-// >XPK<
   case BC_TDUPHI:
     |  ins_AD	// RA = dst&src, RD = const (hi 16 bits)
     |.if DUALNUM
@@ -3691,6 +3690,21 @@ case BC_KSTRHI:
     |  settp RD, LJ_TSTR
     |  mov [BASE+RA*8], RD
     |  ins_next
+    break;
+
+case BC_KCDTHI:
+    |.if FFI
+    |  ins_AD	// RA = lo 16 bits of cdata const/dst, RD = hi 16 bits of cdata const (~)
+    |  movsd xmm0, qword [BASE+RA*8]
+    |  cvtsd2si TMPRd, xmm0
+    |  shl RDd, 16
+    |  or RDd, TMPRd
+    |  not RD // necessary because GCrefs have negative indices
+    |  mov RD, [KBASE+RD*8]
+    |  settp RD, LJ_TCDATA
+    |  mov [BASE+RA*8], RD
+    |  ins_next
+    |.endif
     break;
 
   case BC_GGET:

@@ -201,8 +201,9 @@
   /* 62 */ _(KINTLO, dst,   ___,    lit,    ___) \
   /* 63 */ _(KINTHI, dst,   ___,    lit,    ___) \
   /* 64 */ _(KSTRHI, dst,   ___,    str,    ___) \
-  /* 65 */ _(GGETV,  dst,	___,	var,	index) \
-  /* 66 */ _(GSETV,  var,	___,	var,	newindex)
+  /* 65 */ _(KCDTHI, dst,   ___,    lit,    ___) \
+  /* 66 */ _(GGETV,  dst,	___,	var,	index) \
+  /* 67 */ _(GSETV,  var,	___,	var,	newindex)
 
 /* Bytecode opcode numbers. */
 typedef enum {

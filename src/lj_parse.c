@@ -450,12 +450,13 @@ static void expr_discharge(FuncState *fs, ExpDesc *e)
     if (idx <= BCMAX_D) {
       ins = BCINS_AD(BC_GGET, 0, idx);
     } else {
-        BCReg reg = fs->freereg;
-        bcreg_reserve(fs, 1);
-        bcemit_AD(fs, BC_KINTLO, reg, idx&0xffff);
-        bcemit_AD(fs, BC_KSTRHI, reg, idx>>16);
-        ins = BCINS_AD(BC_GGETV, 0, reg);
-        bcreg_free(fs, reg);
+      fs->flags |= PROTO_NOJIT;
+      BCReg reg = fs->freereg;
+      bcreg_reserve(fs, 1);
+      bcemit_AD(fs, BC_KINTLO, reg, idx&0xffff);
+      bcemit_AD(fs, BC_KSTRHI, reg, idx>>16);
+      ins = BCINS_AD(BC_GGETV, 0, reg);
+      bcreg_free(fs, reg);
     }
   } else if (e->k == VINDEXED) {
     BCReg rc = e->u.s.aux;
@@ -525,12 +526,13 @@ static void expr_toreg_nobranch(FuncState *fs, ExpDesc *e, BCReg reg)
   expr_discharge(fs, e);
   if (e->k == VKSTR) {
     BCReg k = const_str(fs, e);
-    if (k > BCMAX_D) {
-        bcemit_AD(fs, BC_KINTLO, reg, k & 0xffff);
-        ins = BCINS_AD(BC_KSTRHI, reg, k >> 16);
+    if (k <= BCMAX_D) {
+      ins = BCINS_AD(BC_KSTR, reg, k);
     }
     else {
-        ins = BCINS_AD(BC_KSTR, reg, k);
+      fs->flags |= PROTO_NOJIT;
+      bcemit_AD(fs, BC_KINTLO, reg, k & 0xffff);
+      ins = BCINS_AD(BC_KSTRHI, reg, k >> 16);
     }
   } else if (e->k == VKNUM) {
 #if LJ_DUALNUM
@@ -546,20 +548,26 @@ static void expr_toreg_nobranch(FuncState *fs, ExpDesc *e, BCReg reg)
     else
 #endif
     {
-        if ((fs->flags & PROTO_NOJIT) || fs->nkn >= BCMAX_D) {
-            fs->flags |= PROTO_NOJIT;
-            bcemit_AD(fs, BC_KINTLO, reg, k & 0xffff);
-            ins = BCINS_AD(BC_KINTHI, reg, k >> 16);
-        }
-        else {
-            ins = BCINS_AD(BC_KNUM, reg, const_num(fs, e));
-        }
+      if (fs->nkn >= BCMAX_D) {
+        fs->flags |= PROTO_NOJIT;
+        bcemit_AD(fs, BC_KINTLO, reg, k & 0xffff);
+        ins = BCINS_AD(BC_KINTHI, reg, k >> 16);
+      }
+      else {
+        ins = BCINS_AD(BC_KNUM, reg, const_num(fs, e));
+      }
     }
 #if LJ_HASFFI
   } else if (e->k == VKCDATA) {
     fs->flags |= PROTO_FFI;
-    ins = BCINS_AD(BC_KCDATA, reg,
-		   const_gc(fs, obj2gco(cdataV(&e->u.nval)), LJ_TCDATA));
+    BCReg idx = const_gc(fs, obj2gco(cdataV(&e->u.nval)), LJ_TCDATA);
+    if (idx <= BCMAX_D) {
+      ins = BCINS_AD(BC_KCDATA, reg, idx);
+    } else {
+      fs->flags |= PROTO_NOJIT;
+      bcemit_AD(fs, BC_KINTLO, reg, idx & 0xffff);
+      ins = BCINS_AD(BC_KCDTHI, reg, idx >> 16);
+    }
 #endif
   } else if (e->k == VRELOCABLE) {
     setbc_a(bcptr(fs, e), reg);
@@ -670,6 +678,7 @@ static void bcemit_store(FuncState *fs, ExpDesc *var, ExpDesc *e)
     if (idx <= BCMAX_D) {
       ins = BCINS_AD(BC_GSET, ra, const_str(fs, var));
     } else {
+      fs->flags |= PROTO_NOJIT;
       BCReg reg = fs->freereg;
       bcreg_reserve(fs, 1);
       bcemit_AD(fs, BC_KINTLO, reg, idx & 0xffff);
@@ -717,6 +726,7 @@ static void bcemit_method(FuncState *fs, ExpDesc *e, ExpDesc *key)
     if (idx <= BCMAX_D) {
         bcemit_AD(fs, BC_KSTR, func + 2 + LJ_FR2, idx);
     } else {
+      fs->flags |= PROTO_NOJIT;
       bcemit_AD(fs, BC_KINTLO, func + 2 + LJ_FR2, idx & 0xffff);
       bcemit_AD(fs, BC_KSTRHI, func + 2 + LJ_FR2, idx >> 16);
     }
@@ -1398,8 +1408,8 @@ static void fs_fixup_k(FuncState *fs, GCproto *pt, void *kptr)
   TValue *array;
   Node *node;
   MSize i, hmask;
-  checklimitgt(fs, fs->nkn, 0xFFFFFFFF/*BCMAX_D+1*/, "constants");
-  checklimitgt(fs, fs->nkgc, 0xFFFFFFFF, "constants");
+  checklimitgt(fs, fs->nkn, 0xFFFFFFFF, "numeric constants");
+  checklimitgt(fs, fs->nkgc, 0xFFFFFFFF, "GC constants");
   setmref(pt->k, kptr);
   pt->sizekn = fs->nkn;
   pt->sizekgc = fs->nkgc;
