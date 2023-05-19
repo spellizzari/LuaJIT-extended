@@ -289,6 +289,7 @@ $(SolutionDir)bin\$(Platform)\$(Configuration)\buildvm.exe -m folddef -o lj_fold
     <ClInclude Include="src\lualib.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\.editorconfig" />
     <None Include="src\jit\bc.lua" />
     <None Include="src\jit\bcsave.lua" />
     <None Include="src\jit\dis_arm.lua" />
@@ -313,9 +314,9 @@ $(SolutionDir)bin\$(Platform)\$(Configuration)\buildvm.exe -m folddef -o lj_fold
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
   <Target Name="CopyJitFolder" AfterTargets="Build" Inputs="@(None)" Outputs="@(None->'$(OutputPath)%(filename)%(extension)')">
-    <Copy SourceFiles="@(None)" DestinationFolder="$(OutputPath)jit\"/>
+    <Copy SourceFiles="@(None)" DestinationFolder="$(OutputPath)jit\" />
   </Target>
   <ItemGroup>
-    <UpToDateCheckInput Include="@(None)"/>
+    <UpToDateCheckInput Include="@(None)" />
   </ItemGroup>
 </Project>

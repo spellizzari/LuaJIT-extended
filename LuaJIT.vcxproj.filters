@@ -216,5 +216,6 @@
     <None Include="src\jit\zone.lua">
       <Filter>jit</Filter>
     </None>
+    <None Include="src\.editorconfig" />
   </ItemGroup>
 </Project>

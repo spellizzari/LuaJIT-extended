@@ -888,7 +888,7 @@ static void bcemit_comp(FuncState *fs, BinOpr opr, ExpDesc *e1, ExpDesc *e2)
   expr_toval(fs, e1);
   if (opr == OPR_EQ || opr == OPR_NE) {
     BCOp op = opr == OPR_EQ ? BC_ISEQV : BC_ISNEV;
-    BCReg ra;
+    BCReg ra, idx, reg;
     if (expr_isk(e1)) { e1 = e2; e2 = eret; }  /* Need constant in 2nd arg. */
     ra = expr_toanyreg(fs, e1);  /* First arg must be in a reg. */
     expr_toval(fs, e2);
@@ -897,7 +897,18 @@ static void bcemit_comp(FuncState *fs, BinOpr opr, ExpDesc *e1, ExpDesc *e2)
       ins = BCINS_AD(op+(BC_ISEQP-BC_ISEQV), ra, const_pri(e2));
       break;
     case VKSTR:
-      ins = BCINS_AD(op+(BC_ISEQS-BC_ISEQV), ra, const_str(fs, e2));
+      idx = const_str(fs, e2);
+      if (idx <= BCMAX_D) {
+        ins = BCINS_AD(op+(BC_ISEQS-BC_ISEQV), ra, idx);
+      } else {
+        fs->flags |= PROTO_NOJIT;
+        reg = fs->freereg;
+        bcreg_reserve(fs, 1);
+        bcemit_AD(fs, BC_KINTLO, reg, idx & 0xffff);
+        bcemit_AD(fs, BC_KSTRHI, reg, idx >> 16);
+        ins = BCINS_AD(op, ra, reg);
+        bcreg_free(fs, reg);
+      }
       break;
     case VKNUM:
       ins = BCINS_AD(op+(BC_ISEQN-BC_ISEQV), ra, const_num(fs, e2));

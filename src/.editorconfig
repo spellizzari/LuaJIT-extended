@@ -1,15 +1,17 @@
 # Visual Studio generated .editorconfig file with C++ settings.
 root = true
 
-[*.{c++,cc,cpp,cppm,cxx,h,h++,hh,hpp,hxx,inl,ipp,ixx,tlh,tli}]
+[*.{c,c++,cc,cpp,cppm,cxx,h,h++,hh,hpp,hxx,inl,ipp,ixx,tlh,tli}]
+
+indent_style = space
+indent_size = 2
 
 # Visual C++ Code Style settings
 
 cpp_generate_documentation_comments = none
 
 # Visual C++ Formatting settings
-indent_style =  space
-indent_size = 2
+
 cpp_indent_braces = false
 cpp_indent_multi_line_relative_to = innermost_parenthesis
 cpp_indent_within_parentheses = indent
@@ -32,17 +34,17 @@ cpp_new_line_scope_braces_on_separate_lines = false
 cpp_new_line_close_brace_same_line_empty_type = false
 cpp_new_line_close_brace_same_line_empty_function = false
 cpp_new_line_before_catch = true
-cpp_new_line_before_else = true
+cpp_new_line_before_else = false
 cpp_new_line_before_while_in_do_while = false
 cpp_space_before_function_open_parenthesis = remove
 cpp_space_within_parameter_list_parentheses = false
 cpp_space_between_empty_parameter_list_parentheses = false
 cpp_space_after_keywords_in_control_flow_statements = true
-cpp_space_within_control_flow_statement_parentheses = true
+cpp_space_within_control_flow_statement_parentheses = false
 cpp_space_before_lambda_open_parenthesis = false
 cpp_space_within_cast_parentheses = true
 cpp_space_after_cast_close_parenthesis = true
-cpp_space_within_expression_parentheses = true
+cpp_space_within_expression_parentheses = false
 cpp_space_before_block_open_brace = true
 cpp_space_between_empty_braces = false
 cpp_space_before_initializer_list_open_brace = false
@@ -55,7 +57,7 @@ cpp_space_between_empty_square_brackets = true
 cpp_space_group_square_brackets = true
 cpp_space_within_lambda_brackets = false
 cpp_space_between_empty_lambda_brackets = false
-cpp_space_before_comma = true
+cpp_space_before_comma = false
 cpp_space_after_comma = true
 cpp_space_remove_around_member_operators = true
 cpp_space_before_inheritance_colon = true
