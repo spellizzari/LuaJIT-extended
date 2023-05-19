@@ -3634,7 +3634,6 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  mov L:RB->base, BASE
     |  jae >3
     |2:
-//    |  int3
     |  shl RD, 16
     |  or  RD, TMPR
     |  not RD
@@ -3708,6 +3707,25 @@ case BC_KSTRHI:
     |  cleartp LFUNC:RB
     |  mov TAB:RB, LFUNC:RB->env
     |  mov STR:RC, [KBASE+RD*8]
+    |  jmp ->BC_TSETS_Z
+    break;
+
+  case BC_GGETV:
+    |  ins_AD	// RA = dst, RD = key
+    |  mov LFUNC:RB, [BASE-16]
+    |  cleartp LFUNC:RB
+    |  mov TAB:RB, LFUNC:RB->env
+    |  mov STR:RC, [BASE+RD*8]
+    |  cleartp STR:RC
+    |  jmp ->BC_TGETS_Z
+    break;
+  case BC_GSETV:
+    |  ins_AD	// RA = src, RD = key
+    |  mov LFUNC:RB, [BASE-16]
+    |  cleartp LFUNC:RB
+    |  mov TAB:RB, LFUNC:RB->env
+    |  mov STR:RC, [BASE+RD*8]
+    |  cleartp STR:RC
     |  jmp ->BC_TSETS_Z
     break;
 

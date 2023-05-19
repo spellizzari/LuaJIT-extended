@@ -446,7 +446,17 @@ static void expr_discharge(FuncState *fs, ExpDesc *e)
   if (e->k == VUPVAL) {
     ins = BCINS_AD(BC_UGET, 0, e->u.s.info);
   } else if (e->k == VGLOBAL) {
-    ins = BCINS_AD(BC_GGET, 0, const_str(fs, e));
+    BCReg idx = const_str(fs, e);
+    if (idx <= BCMAX_D) {
+      ins = BCINS_AD(BC_GGET, 0, idx);
+    } else {
+        BCReg reg = fs->freereg;
+        bcreg_reserve(fs, 1);
+        bcemit_AD(fs, BC_KINTLO, reg, idx&0xffff);
+        bcemit_AD(fs, BC_KSTRHI, reg, idx>>16);
+        ins = BCINS_AD(BC_GGETV, 0, reg);
+        bcreg_free(fs, reg);
+    }
   } else if (e->k == VINDEXED) {
     BCReg rc = e->u.s.aux;
     if ((int32_t)rc < 0) {
@@ -656,7 +666,17 @@ static void bcemit_store(FuncState *fs, ExpDesc *var, ExpDesc *e)
       ins = BCINS_AD(BC_USETV, var->u.s.info, expr_toanyreg(fs, e));
   } else if (var->k == VGLOBAL) {
     BCReg ra = expr_toanyreg(fs, e);
-    ins = BCINS_AD(BC_GSET, ra, const_str(fs, var));
+    BCReg idx = const_str(fs, var);
+    if (idx <= BCMAX_D) {
+      ins = BCINS_AD(BC_GSET, ra, const_str(fs, var));
+    } else {
+      BCReg reg = fs->freereg;
+      bcreg_reserve(fs, 1);
+      bcemit_AD(fs, BC_KINTLO, reg, idx & 0xffff);
+      bcemit_AD(fs, BC_KSTRHI, reg, idx >> 16);
+      ins = BCINS_AD(BC_GSETV, 0, reg);
+      bcreg_free(fs, reg);
+    }
   } else {
     BCReg ra, rc;
     lj_assertFS(var->k == VINDEXED, "bad expr type %d", var->k);
