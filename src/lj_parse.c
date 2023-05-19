@@ -666,9 +666,20 @@ static void bcemit_store(FuncState *fs, ExpDesc *var, ExpDesc *e)
     expr_toval(fs, e);
     if (e->k <= VKTRUE)
       ins = BCINS_AD(BC_USETP, var->u.s.info, const_pri(e));
-    else if (e->k == VKSTR)
-      ins = BCINS_AD(BC_USETS, var->u.s.info, const_str(fs, e));
-    else if (e->k == VKNUM)
+    else if (e->k == VKSTR) {
+      BCReg idx = const_str(fs, e);
+      if (idx <= BCMAX_D) {
+        ins = BCINS_AD(BC_USETS, var->u.s.info, idx);
+      } else {
+        fs->flags |= PROTO_NOJIT;
+        BCReg reg = fs->freereg;
+        bcreg_reserve(fs, 1);
+        bcemit_AD(fs, BC_KINTLO, reg, idx & 0xffff);
+        bcemit_AD(fs, BC_KSTRHI, reg, idx >> 16);
+        ins = BCINS_AD(BC_USETV, var->u.s.info, reg);
+        bcreg_free(fs, reg);
+      }
+    } else if (e->k == VKNUM)
       ins = BCINS_AD(BC_USETN, var->u.s.info, const_num(fs, e));
     else
       ins = BCINS_AD(BC_USETV, var->u.s.info, expr_toanyreg(fs, e));
