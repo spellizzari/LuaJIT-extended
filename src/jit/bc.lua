@@ -90,7 +90,11 @@ local function bcline(func, pc, prefix)
     end
     kc = format(#kc > 40 and '"%.40s"~' or '"%s"', gsub(kc, "%c", ctlsub))
   elseif mc == 9*128 then -- BCMnum
-    kc = funck(func, d)
+    if op == "KNUMHI" then 
+      kc = funck(func, d*65536+shr(funcbc(func, pc-1), 16))
+    else
+      kc = funck(func, d)
+    end
     if op == "TSETM " then kc = kc - 2^52 end
   elseif mc == 12*128 then -- BCMfunc
     local fi = funcinfo(funck(func, -d-1))

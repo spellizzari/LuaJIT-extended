@@ -922,7 +922,18 @@ static void bcemit_comp(FuncState *fs, BinOpr opr, ExpDesc *e1, ExpDesc *e2)
       }
       break;
     case VKNUM:
-      ins = BCINS_AD(op+(BC_ISEQN-BC_ISEQV), ra, const_num(fs, e2));
+      idx = const_num(fs, e2);
+      if (idx <= BCMAX_D) {
+        ins = BCINS_AD(op + (BC_ISEQN - BC_ISEQV), ra, idx);
+      } else {
+        fs->flags |= PROTO_NOJIT;
+        reg = fs->freereg;
+        bcreg_reserve(fs, 1);
+        bcemit_AD(fs, BC_KINTLO, reg, idx & 0xffff);
+        bcemit_AD(fs, BC_KNUMHI, reg, idx >> 16);
+        ins = BCINS_AD(op, ra, reg);
+        bcreg_free(fs, reg);
+      }
       break;
     default:
       ins = BCINS_AD(op, ra, expr_toanyreg(fs, e2));

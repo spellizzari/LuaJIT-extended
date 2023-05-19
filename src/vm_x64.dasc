@@ -3692,6 +3692,17 @@ case BC_KSTRHI:
     |  ins_next
     break;
 
+case BC_KNUMHI:
+    |  ins_AD	// RA = lo 16 bits of num const/dst, RD = hi 16 bits of num const (~)
+    |  movsd xmm0, qword [BASE+RA*8]
+    |  cvtsd2si TMPRd, xmm0
+    |  shl RDd, 16
+    |  or RDd, TMPRd
+    |  movsd xmm0, qword [KBASE+RD*8]
+    |  movsd qword [BASE+RA*8], xmm0
+    |  ins_next
+    break;
+
 case BC_KCDTHI:
     |.if FFI
     |  ins_AD	// RA = lo 16 bits of cdata const/dst, RD = hi 16 bits of cdata const (~)
