@@ -1854,17 +1854,16 @@ static void expr_table(LexState *ls, ExpDesc *e)
 	    t = lj_tab_new(fs->L, needarr ? narr : 0, hsize2hbits(nhash));
 	    kidx = const_gc(fs, obj2gco(t), LJ_TTAB);
         if (fs->nkgc < BCMAX_D) {
-            fs->bcbase[pc].ins = BCINS_AD(BC_TDUP, freg - 1, kidx);
-        }
-        else {
-            fs->bcbase[pc].ins = BCINS_AD(BC_KINTLO, freg - 1, kidx & 0xffff);
-            bcemit_INS(fs, 0);
-            for (BCPos p = fs->pc - 1; p > pc + 1; --p) {
-                fs->bcbase[p] = fs->bcbase[p - 1];
-            }
-            fs->bcbase[pc + 1] = fs->bcbase[pc];
-            fs->bcbase[pc + 1].ins = BCINS_AD(BC_TDUPHI, freg - 1, kidx >> 16);
-            fs->flags |= PROTO_NOJIT;
+          fs->bcbase[pc].ins = BCINS_AD(BC_TDUP, freg - 1, kidx);
+        } else {
+          fs->bcbase[pc].ins = BCINS_AD(BC_KINTLO, freg - 1, kidx & 0xffff);
+          bcemit_INS(fs, 0);
+          for (BCPos p = fs->pc - 1; p > pc + 1; --p) {
+            fs->bcbase[p] = fs->bcbase[p - 1];
+          }
+          fs->bcbase[pc + 1] = fs->bcbase[pc];
+          fs->bcbase[pc + 1].ins = BCINS_AD(BC_TDUPHI, freg - 1, kidx >> 16);
+          fs->flags |= PROTO_NOJIT;
         }
       }
       vcall = 0;
