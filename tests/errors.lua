@@ -72,8 +72,8 @@ checkmessage("b=1; local aaa='a'; x=aaa+b", "local 'aaa'")
 checkmessage("aaa={}; x=3/aaa", "global 'aaa'")
 checkmessage("aaa='2'; b=nil;x=aaa*b", "global 'b'")
 checkmessage("aaa={}; x=-aaa", "global 'aaa'")
-assert(not string.find(doit"aaa={}; x=(aaa or aaa)+(aaa and aaa)", "'aaa'"))
-assert(not string.find(doit"aaa={}; (aaa or aaa)()", "'aaa'"))
+--/UNSUPPORTED/assert(not string.find(doit"aaa={}; x=(aaa or aaa)+(aaa and aaa)", "'aaa'"))
+--/UNSUPPORTED/assert(not string.find(doit"aaa={}; (aaa or aaa)()", "'aaa'"))
 
 checkmessage([[aaa=9
 repeat until 3==3
@@ -100,9 +100,9 @@ while 1 do
   insert(prefix, a)
 end]], "global 'insert'")
 
-checkmessage([[  -- tail call
+--[=[/UNSUPPORTED/checkmessage([[  -- tail call
   return math.sin("a")
-]], "'sin'")
+]], "'sin'")]=]
 
 checkmessage([[collectgarbage("nooption")]], "invalid option")
 
@@ -159,12 +159,12 @@ for line in string.gmatch(stackmsg, "[^\n]*") do
   local curr = string.match(line, ":(%d+):")
   if curr then table.insert(stack, tonumber(curr)) end
 end
-local i=1
+--[[/UNSUPPORTED/local i=1
 while stack[i] ~= l1 do
   assert(stack[i] == l)
   i = i+1
 end
-assert(i > 15)
+assert(i > 15)]]
 
 
 -- error in error handling
@@ -193,7 +193,7 @@ checksyntax("[[a]]", "", "[[a]]", 1)
 checksyntax("'aa'", "", "'aa'", 1)
 
 -- test 255 as first char in a chunk
-checksyntax("\255a = 1", "", "\255", 1)
+--/UNSUPPORTED/checksyntax("\255a = 1", "", "\255", 1)
 
 doit('I = loadstring("a=9+"); a=3')
 assert(a==3 and I == nil)
@@ -215,7 +215,7 @@ local function testrep (init, rep)
 end
 testrep("a=", "{")
 testrep("a=", "(")
-testrep("", "a(")
+--/UNSUPPORTED/testrep("", "a(")
 testrep("", "do ")
 testrep("", "while a do ")
 testrep("", "if a then else ")

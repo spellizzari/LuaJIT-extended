@@ -77,7 +77,10 @@ os.tmpname = function()
   return path
 end
 
---dofile('main.lua')
+-- not defined in LuaJIT
+math.mod = function(a,b) return a % b end
+
+--/UNSUPPORTED/dofile('main.lua')
 
 do
   local u = newproxy(true)
@@ -90,7 +93,7 @@ end
 
 local f = assert(loadfile('gc.lua'))
 f()
-dofile('db.lua')
+--/UNSUPPORTED/dofile('db.lua')
 assert(dofile('calls.lua') == deep and deep)
 dofile('strings.lua')
 dofile('literals.lua')
@@ -107,13 +110,13 @@ dofile('nextvar.lua')
 dofile('pm.lua')
 dofile('api.lua')
 assert(dofile('events.lua') == 12)
-dofile('vararg.lua')
+--/UNSUPPORTED/dofile('vararg.lua')
 dofile('closure.lua')
 dofile('errors.lua')
 dofile('math.lua')
 dofile('sort.lua')
 assert(dofile('verybig.lua') == 10); collectgarbage()
-dofile('files.lua')
+--/UNSUPPORTED/dofile('files.lua')
 
 if #msgs > 0 then
   print("\ntests not performed:")

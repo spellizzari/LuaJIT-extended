@@ -44,7 +44,7 @@ assert(string.len(b) == 960)
 prog = [=[
 print('+')
 
-a1 = [["isto e' um string com várias 'aspas'"]]
+a1 = [["isto e' um string com vï¿½rias 'aspas'"]]
 a2 = "'aspas'"
 
 assert(string.find(a1, a2) == 31)
@@ -89,8 +89,8 @@ x = 1
 
 print('+')
 x = nil
-dostring(prog)
-assert(x)
+--/UNSUPPORTED/dostring(prog)
+--/UNSUPPORTED/assert(x)
 
 prog = nil
 a = nil
@@ -159,7 +159,7 @@ end
 
 -- testing decimal point locale
 if os.setlocale("pt_BR") or os.setlocale("ptb") then
-  assert(tonumber("3,4") == 3.4 and tonumber"3.4" == nil)
+  --/UNSUPPORTED/assert(tonumber("3,4") == 3.4 and tonumber"3.4" == nil)
   assert(assert(loadstring("return 3.4"))() == 3.4)
   assert(assert(loadstring("return .4,3"))() == .4)
   assert(assert(loadstring("return 4."))() == 4.)

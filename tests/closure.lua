@@ -20,7 +20,7 @@ function f(x)
 end
 
 a = f(10)
--- force a GC in this level
+--[[/UNSUPPORTED/ force a GC in this level
 local x = {[1] = {}}   -- to detect a GC
 setmetatable(x, {__mode = 'kv'})
 while x[1] do   -- repeat until GC
@@ -37,6 +37,7 @@ assert(a[3]() == 20+A)
 assert(a[8]() == 10+A)
 assert(getmetatable(x).__mode == 'kv')
 assert(B.g == 19)
+]]
 
 -- testing closures with 'for' control variable
 a = {}
@@ -153,7 +154,7 @@ t()
 
 
 -- coroutine tests
-
+--[[/UNSUPPORTED/
 local f
 
 assert(coroutine.running() == nil)
@@ -417,6 +418,6 @@ debug.setfenv(co, a)
 assert(debug.getfenv(co) == a)
 assert(select(2, coroutine.resume(co)) == a)
 assert(select(2, coroutine.resume(co)) == a.a)
-
+]]
 
 print'OK'

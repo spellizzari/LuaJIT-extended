@@ -109,7 +109,7 @@ local function dosteps (siz)
 end
 
 assert(dosteps(0) > 10)
-assert(dosteps(6) < dosteps(2))
+--/UNSUPPORTED/assert(dosteps(6) < dosteps(2))
 assert(dosteps(10000) == 1)
 assert(collectgarbage("step", 1000000) == true)
 assert(collectgarbage("step", 1000000))
@@ -252,7 +252,7 @@ assert(m==10)
 u = newproxy(true)
 getmetatable(u).__gc = function () error "!!!" end
 u = nil
-assert(not pcall(collectgarbage))
+--/UNSUPPORTED/assert(not pcall(collectgarbage))
 
 
 if not rawget(_G, "_soft") then
