@@ -13,3 +13,4 @@
 bin/
 obj/
 *.user
+/testRunner/discovery.txt
