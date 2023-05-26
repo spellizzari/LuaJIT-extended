@@ -149,6 +149,32 @@ local function bcdump(func, out, all)
     if not s then break end
     out:write(s)
   end
+  out:write(format("-- NUMBER CONSTANTS -- %d\n", fi.nconsts))
+  for n=0,fi.nconsts-1 do
+    local k = funck(func, n)
+    out:write(format("%-10d %f\n", n, k))
+  end
+  out:write(format("-- GC CONSTANTS -- %d\n", fi.gcconsts))
+  for n=-1,-fi.gcconsts,-1 do
+    local k = funck(func, n)
+    local t = type(k)
+    out:write(format("%-10d ", -n-1))
+    if t=="string" then
+      out:write(format("%q", k))
+    elseif t=="table" then
+      out:write("{ ")
+      for key,val in pairs(k) do
+        out:write(tostring(key))
+        out:write("=")
+        out:write(tostring(val))
+        out:write(", ")
+      end
+      out:write("}")
+    elseif t=="function" then
+      out:write("function")
+    end
+    out:write("\n")
+  end
   out:write("\n")
   out:flush()
 end
