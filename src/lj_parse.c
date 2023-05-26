@@ -548,13 +548,14 @@ static void expr_toreg_nobranch(FuncState *fs, ExpDesc *e, BCReg reg)
     else
 #endif
     {
-      if (fs->nkn >= BCMAX_D) {
-        fs->flags |= PROTO_NOJIT;
-        bcemit_AD(fs, BC_KINTLO, reg, k & 0xffff);
-        ins = BCINS_AD(BC_KINTHI, reg, k >> 16);
+      BCReg idx = const_num(fs, e);
+      if (idx <= BCMAX_D) {
+        ins = BCINS_AD(BC_KNUM, reg, const_num(fs, e));
       }
       else {
-        ins = BCINS_AD(BC_KNUM, reg, const_num(fs, e));
+        fs->flags |= PROTO_NOJIT;
+        bcemit_AD(fs, BC_KINTLO, reg, idx & 0xffff);
+        ins = BCINS_AD(BC_KNUMHI, reg, idx >> 16);
       }
     }
 #if LJ_HASFFI
@@ -1821,7 +1822,6 @@ static void expr_table(LexState *ls, ExpDesc *e)
   uint32_t nhash = 0;  /* Number of hash entries. */
   BCReg freg = fs->freereg;
   BCPos pc = bcemit_AD(fs, BC_TNEW, freg, 0);
-  BCPos pc2;
   expr_init(e, VNONRELOC, freg);
   bcreg_reserve(fs, 1);
   freg++;
@@ -1847,12 +1847,14 @@ static void expr_table(LexState *ls, ExpDesc *e)
     }
     expr(ls, &val);
     if (expr_isk(&key) && key.k != VKNIL &&
-	(key.k == VKSTR || expr_isk_nojump(&val))) {
+	(/*key.k == VKSTR || */expr_isk_nojump(&val))) {
+      /* NOTE: commented code above is because when constructed table only has 
+         string keys with non-constant values, we end up TDUPing an empty table */
       TValue k, *v;
       if (!t) {  /* Create template table on demand. */
-	    BCReg kidx;
-	    t = lj_tab_new(fs->L, needarr ? narr : 0, hsize2hbits(nhash));
-	    kidx = const_gc(fs, obj2gco(t), LJ_TTAB);
+	      BCReg kidx;
+	      t = lj_tab_new(fs->L, needarr ? narr : 0, hsize2hbits(nhash));
+	      kidx = const_gc(fs, obj2gco(t), LJ_TTAB);
         if (fs->nkgc < BCMAX_D) {
           fs->bcbase[pc].ins = BCINS_AD(BC_TDUP, freg - 1, kidx);
         } else {
@@ -1896,9 +1898,14 @@ static void expr_table(LexState *ls, ExpDesc *e)
     expr_init(&en, VKNUM, 0);
     en.u.nval.u32.lo = narr-1;
     en.u.nval.u32.hi = 0x43300000;  /* Biased integer to avoid denormals. */
-    if (narr > 256) { fs->pc--; ilp--; }
-    ilp->ins = BCINS_AD(BC_TSETM, freg, const_num(fs, &en));
-    setbc_b(&ilp[-1].ins, 0);
+    BCReg idx = const_num(fs, &en);
+    if (idx <= BCMAX_D) {
+      if (narr > 256) { fs->pc--; ilp--; } // remove KNUM before TSETV
+      setbc_b(&ilp[-1].ins, 0); // allow mulret in CALL
+      ilp->ins = BCINS_AD(BC_TSETM, freg, idx);
+    } else {
+      err_limit(fs, BCMAX_D, "numeric constants and a mulret function in a table constructor");
+    }
   }
   if (pc == fs->pc-1) {  /* Make expr relocable if possible. */
     e->u.s.info = pc;
