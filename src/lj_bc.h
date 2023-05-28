@@ -196,7 +196,7 @@
   /* 5F */ _(FUNCC,	rbase,	___,	___,	___) \
   /* 60 */ _(FUNCCW,rbase,	___,	___,	___) \
   \
-  /* >XPK< Additional opcodes. */ \
+  /* Additional opcodes. */ \
   /* 61 */ _(TDUPHI, dst,   ___,  tab,  gc) \
   /* 62 */ _(KINTLO, dst,   ___,  lit,  ___) \
   /* 63 */ _(KINTHI, dst,   ___,  lit,  ___) \
@@ -204,7 +204,9 @@
   /* 65 */ _(KCDTHI, dst,   ___,  lit,  ___) \
   /* 66 */ _(KNUMHI, dst,   ___,  num,  ___) \
   /* 67 */ _(GGETV,  dst,	  ___,  var,  index) \
-  /* 68 */ _(GSETV,  var, 	___,  var,  newindex)
+  /* 68 */ _(GSETV,  var, 	___,  var,  newindex) \
+  /* 69 */ _(TINS,	 var,	  var,	var,	newindex) \
+  /* 6A */ _(TINSM,	 base,	___,	var,	newindex)
 
 /* Bytecode opcode numbers. */
 typedef enum {
