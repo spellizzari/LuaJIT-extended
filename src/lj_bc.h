@@ -206,7 +206,8 @@
   /* 67 */ _(GGETV,  dst,	  ___,  var,  index) \
   /* 68 */ _(GSETV,  var, 	___,  var,  newindex) \
   /* 69 */ _(TINS,	 var,	  var,	var,	newindex) \
-  /* 6A */ _(TINSM,	 base,	___,	var,	newindex)
+  /* 6A */ _(NOP,    ___,	  ___,	lit,	___) \
+  /* 6B */ _(TSTML,  base,	___,	num,	newindex)
 
 /* Bytecode opcode numbers. */
 typedef enum {
@@ -273,5 +274,9 @@ static LJ_AINLINE int bc_isret(BCOp op)
 
 LJ_DATA const uint16_t lj_bc_mode[];
 LJ_DATA const uint16_t lj_bc_ofs[];
+
+#include "lj_obj.h"
+LUA_API void lua_print_func_bc(lua_State* L);
+LUA_API void lua_print_proto_bc(GCproto* pt);
 
 #endif

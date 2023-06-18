@@ -18,6 +18,7 @@
 #include "lj_err.h"
 #include "lj_debug.h"
 #include "lj_lib.h"
+#include "lj_bc.h"
 
 /* ------------------------------------------------------------------------ */
 
@@ -392,6 +393,32 @@ LJLIB_CF(debug_traceback)
   else
     luaL_traceback(L, L1, msg, lj_lib_optint(L, arg+2, (L == L1)));
   return 1;
+}
+
+/* ------------------------------------------------------------------------ */
+
+#include "lj_frame.h"
+
+LJLIB_CF(debug_printbc)
+{
+  int nargs = (int) (L->top - L->base);
+  GCfunc* fn = NULL;
+  if (nargs == 0) {
+    int size;
+    cTValue* frame = lj_debug_frame(L, 1, &size);
+    if (frame)
+    {
+      fn = frame_func(frame);
+    }
+  } else {
+    fn = lj_lib_checkfunc(L, 1);
+  }
+
+  if (fn) {
+    lua_print_proto_bc(funcproto(fn));
+  }
+
+  return 0;
 }
 
 /* ------------------------------------------------------------------------ */

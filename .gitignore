@@ -14,3 +14,4 @@ bin/
 obj/
 *.user
 /testRunner/discovery.txt
+/luajit.args.json

@@ -4099,56 +4099,15 @@ case BC_KCDTHI:
     |  jmp <2
     break;
 
-case BC_TINS:
-    |  ins_ABC	// RA = src, RB = table, RC = integer key, will get incremented
-    |  mov TAB:RB, [BASE+RB*8]
-    |.if DUALNUM
-    |  mov r12, qword [BASE+RC*8]
-    |  mov r13, r12
-    |  add r12, 1
-    |  mov qword [BASE+RC*8], r12
-    |  mov RC, r13
-    |.else
-    |  movsd xmm0, qword [BASE+RC*8]
-    |  cvtsd2si TMPRd, xmm0
-    |  mov r12d, TMPRd
-    |  add TMPRd, 1
-    |  cvtsi2sd xmm0, TMPRd
-    |  movsd qword [BASE+RC*8], xmm0
-    |  mov RCd, r12d
-    |.endif
-    |  cmp RCd, TAB:RB->asize		// Takes care of unordered, too.
-    |  jae ->vmeta_tsetv
-    |  shl RCd, 3
-    |  add RC, TAB:RB->array
-    |  cmp aword [RC], LJ_TNIL
-    |  je >3				// Previous value is nil?
+  case BC_TSTML:
+    |  ins_AD	// RA = base (table at base-1), RD = num const (start index, hi word)
     |1:
-    |  test byte TAB:RB->marked, LJ_GC_BLACK	// isblack(table)
-    |  jnz >4
-    |2:  // Set array slot.
-    |  mov RB, [BASE+RA*8]
-    |  mov [RC], RB
-    |  ins_next
-    |
-    |3:  // Check for __newindex if previous value is nil.
-    |  mov TAB:TMPR, TAB:RB->metatable
-    |  test TAB:TMPR, TAB:TMPR
-    |  jz <1
-    |  test byte TAB:TMPR->nomm, 1<<MM_newindex
-    |  jz ->vmeta_tsetv			// 'no __newindex' flag NOT set: check.
-    |  jmp <1
-    |
-    |4:  // Possible table write barrier for the value. Skip valiswhite check.
-    |  barrierback TAB:RB, TMPR
-    |  jmp <2
-    break;
-
-  case BC_TINSM:
-    |  ins_AD	// RA = base (table at base-1), RD = start index (incremented)
-    |1:
-    |  movsd xmm0, qword [BASE+RD*8]
-    |  
+    |  xor r10, r10
+    |  mov r10w, word [PC+2] // lo word is in next op, which is a nop
+    |  shl RD, 16
+    |  or  RD, r10
+    |  ins_AD	// RA = base (table at base-1), RD = num const (start index)
+    |  mov TMPRd, dword [KBASE+RD*8]	// Integer constant is in lo-word.
     |  lea RA, [BASE+RA*8]
     |  mov TAB:RB, [RA-8]		// Guaranteed to be a table.
     |  cleartp TAB:RB
@@ -4189,6 +4148,109 @@ case BC_TINS:
     |
     |7:  // Possible table write barrier for any value. Skip valiswhite check.
     |  barrierback TAB:RB, RD
+    |  jmp <2
+    break;
+
+  case BC_NOP:
+    |  ins_next
+    break;
+
+//  case BC_TSETMR:
+//    |  ins_ABC	// RA = base, RB = table, RC = start index
+//    |  mov r12, RB
+//    |1:
+//    |.if DUALNUM
+//    |  mov TMPR, qword [BASE+RC*8]
+//    |.else
+//    |  movsd xmm0, qword [BASE+RC*8]
+//    |  cvtsd2si TMPRd, xmm0
+//    |.endif
+//    |  lea RA, [BASE+RA*8]
+//    |  mov TAB:RB, [BASE+r12*8]	// Guaranteed to be a table.
+//    |  cleartp TAB:RB
+//    |  test byte TAB:RB->marked, LJ_GC_BLACK	// isblack(table)
+//    |  jnz >7
+//    |2:
+//    |  mov RDd, MULTRES
+//    |  sub RDd, 1
+//    |  jz >4				// Nothing to copy?
+//    |  add RDd, TMPRd			// Compute needed size.
+//    |  cmp RDd, TAB:RB->asize
+//    |  ja >5				// Doesn't fit into array part?
+//    |  sub RDd, TMPRd
+//    |  shl TMPRd, 3
+//    |  add TMPR, TAB:RB->array
+//    |3:  // Copy result slots to table.
+//    |  mov RB, [RA]
+//    |  add RA, 8
+//    |  mov [TMPR], RB
+//    |  add TMPR, 8
+//    |  sub RDd, 1
+//    |  jnz <3
+//    |4:
+//    |  ins_next
+//    |
+//    |5:  // Need to resize array part.
+//    |  mov L:CARG1, SAVE_L
+//    |  mov L:CARG1->base, BASE		// Caveat: CARG2/CARG3 may be BASE.
+//    |  mov CARG2, TAB:RB
+//    |  mov CARG3d, RDd
+//    |  mov L:RB, L:CARG1
+//    |  mov SAVE_PC, PC
+//    |  call extern lj_tab_reasize	// (lua_State *L, GCtab *t, int nasize)
+//    |  mov BASE, L:RB->base
+//    |  movzx RAd, PC_RA			// Restore RA.
+//    |  movzx RCd, PC_RC			// Restore RC.
+//    |  jmp <1				// Retry.
+//    |
+//    |7:  // Possible table write barrier for any value. Skip valiswhite check.
+//    |  barrierback TAB:RB, TMPRd
+//    |  jmp <2
+//    break;
+
+case BC_TINS:
+    |  ins_ABC	// RA = src, RB = table, RC = integer key, will get incremented
+    |  mov TAB:RB, [BASE+RB*8]
+    |  cleartp TAB:RB
+    |.if DUALNUM
+    |  mov r12, qword [BASE+RC*8]
+    |  mov r13, r12
+    |  add r12, 1
+    |  mov qword [BASE+RC*8], r12
+    |  mov RC, r13
+    |.else
+    |  movsd xmm0, qword [BASE+RC*8]
+    |  cvtsd2si TMPRd, xmm0
+    |  mov r12d, TMPRd
+    |  add TMPRd, 1
+    |  cvtsi2sd xmm0, TMPRd
+    |  movsd qword [BASE+RC*8], xmm0
+    |  mov RCd, r12d
+    |.endif
+    |  cmp RCd, TAB:RB->asize		// Takes care of unordered, too.
+    |  jae ->vmeta_tsetv
+    |  shl RCd, 3
+    |  add RC, TAB:RB->array
+    |  cmp aword [RC], LJ_TNIL
+    |  je >3				// Previous value is nil?
+    |1:
+    |  test byte TAB:RB->marked, LJ_GC_BLACK	// isblack(table)
+    |  jnz >4
+    |2:  // Set array slot.
+    |  mov RB, [BASE+RA*8]
+    |  mov [RC], RB
+    |  ins_next
+    |
+    |3:  // Check for __newindex if previous value is nil.
+    |  mov TAB:TMPR, TAB:RB->metatable
+    |  test TAB:TMPR, TAB:TMPR
+    |  jz <1
+    |  test byte TAB:TMPR->nomm, 1<<MM_newindex
+    |  jz ->vmeta_tsetv			// 'no __newindex' flag NOT set: check.
+    |  jmp <1
+    |
+    |4:  // Possible table write barrier for the value. Skip valiswhite check.
+    |  barrierback TAB:RB, TMPR
     |  jmp <2
     break;
 

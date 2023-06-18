@@ -723,7 +723,7 @@ static void bcemit_store(FuncState *fs, ExpDesc *var, ExpDesc *e)
       /* Free late alloced key reg to avoid assert on free of value reg. */
       /* This can only happen when called from expr_table(). */
       if (e->k == VNONRELOC && ra >= fs->nactvar && rc >= ra)
-	bcreg_free(fs, rc);
+	      bcreg_free(fs, rc);
 #endif
       ins = BCINS_ABC(BC_TSETV, ra, var->u.s.info, rc);
     }
@@ -1874,7 +1874,7 @@ static void expr_table(LexState *ls, ExpDesc *e)
       v = lj_tab_set(fs->L, t, &k);
       lj_gc_anybarriert(fs->L, t);
       if (expr_isk_nojump(&val)) {  /* Add const key/value to template table. */
-	expr_kvalue(fs, v, &val);
+	    expr_kvalue(fs, v, &val);
       } else {  /* Otherwise create dummy string key (avoids lj_tab_newkey). */
 	settabV(fs->L, v, t);  /* Preserve key with table itself as value. */
 	fixt = 1;   /* Fix this later, after all resizes. */
@@ -1892,20 +1892,22 @@ static void expr_table(LexState *ls, ExpDesc *e)
   lex_match(ls, '}', '{', line);
   if (vcall) {
     BCInsLine *ilp = &fs->bcbase[fs->pc-1];
-    ExpDesc en;
     lj_assertFS(bc_a(ilp->ins) == freg &&
-		bc_op(ilp->ins) == (narr > 256 ? BC_TSETV : BC_TSETB),
-		"bad CALL code generation");
+      bc_op(ilp->ins) == (narr > 256 ? BC_TSETV : BC_TSETB),
+      "bad CALL code generation");
+    ExpDesc en;
     expr_init(&en, VKNUM, 0);
-    en.u.nval.u32.lo = narr-1;
+    en.u.nval.u32.lo = narr - 1;
     en.u.nval.u32.hi = 0x43300000;  /* Biased integer to avoid denormals. */
     BCReg idx = const_num(fs, &en);
+    if (narr > 256) { fs->pc--; ilp--; } // remove KNUM before TSETV
+    setbc_b(&ilp[-1].ins, 0); // allow mulret in CALL
     if (idx <= BCMAX_D) {
-      if (narr > 256) { fs->pc--; ilp--; } // remove KNUM before TSETV
-      setbc_b(&ilp[-1].ins, 0); // allow mulret in CALL
       ilp->ins = BCINS_AD(BC_TSETM, freg, idx);
     } else {
-      err_limit(fs, BCMAX_D, "numeric constants and a mulret function in a table constructor");
+      fs->flags |= PROTO_NOJIT;
+      ilp->ins = BCINS_AD(BC_TSTML, freg, idx >> 16);
+      bcemit_AD(fs, BC_NOP, 0, idx & 0xffff);
     }
   }
   if (pc == fs->pc-1) {  /* Make expr relocable if possible. */
@@ -1928,11 +1930,11 @@ static void expr_table(LexState *ls, ExpDesc *e)
       Node *node = noderef(t->node);
       uint32_t i, hmask = t->hmask;
       for (i = 0; i <= hmask; i++) {
-	Node *n = &node[i];
-	if (tvistab(&n->val)) {
-	  lj_assertFS(tabV(&n->val) == t, "bad dummy key in template table");
-	  setnilV(&n->val);  /* Turn value into nil. */
-	}
+	      Node *n = &node[i];
+	      if (tvistab(&n->val)) {
+	        lj_assertFS(tabV(&n->val) == t, "bad dummy key in template table");
+	        setnilV(&n->val);  /* Turn value into nil. */
+	      }
       }
     }
     lj_gc_check(fs->L);

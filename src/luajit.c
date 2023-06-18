@@ -275,6 +275,7 @@ static int handle_script(lua_State *L, char **argx)
     fname = NULL;  /* stdin */
   status = luaL_loadfile(L, fname);
   if (status == LUA_OK) {
+    //lua_print_func_bc(L); // >XPK< uncomment to dump function bytecode
     /* Fetch args from arg table. LUA_INIT or -e might have changed them. */
     int narg = 0;
     lua_getglobal(L, "arg");
