@@ -286,6 +286,11 @@ static int jmp_patchtestreg(FuncState *fs, BCPos pc, BCReg reg)
 {
   BCInsLine *ilp = &fs->bcbase[pc >= 1 ? pc-1 : pc];
   BCOp op = bc_op(ilp->ins);
+  if ((op >= BC_TDUPHI) && (op <= BC_KNUMHI)) {
+    if (!jmp_patchtestreg(fs, pc-1, reg)) {
+      return 0;
+    }
+  }
   if (op == BC_ISTC || op == BC_ISFC) {
     if (reg != NO_REG && reg != bc_d(ilp->ins)) {
       setbc_a(&ilp->ins, reg);

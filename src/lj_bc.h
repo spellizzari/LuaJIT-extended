@@ -197,8 +197,8 @@
   /* 60 */ _(FUNCCW,rbase,	___,	___,	___) \
   \
   /* Additional opcodes. */ \
-  /* 61 */ _(TDUPHI, dst,   ___,  tab,  gc) \
-  /* 62 */ _(KINTLO, dst,   ___,  lit,  ___) \
+  /* 61 */ _(KINTLO, dst,   ___,  lit,  ___) \
+  /* 62 */ _(TDUPHI, dst,   ___,  tab,  gc) \
   /* 63 */ _(KINTHI, dst,   ___,  lit,  ___) \
   /* 64 */ _(KSTRHI, dst,   ___,  str,  ___) \
   /* 65 */ _(KCDTHI, dst,   ___,  lit,  ___) \
