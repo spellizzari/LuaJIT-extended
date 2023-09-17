@@ -58,6 +58,7 @@ LUA_API int lua_loadx(lua_State *L, lua_Reader reader, void *data,
   status = lj_vm_cpcall(L, NULL, &ls, cpparser);
   lj_lex_cleanup(L, &ls);
   lj_gc_check(L);
+  //lua_print_func_bc(L); // >xpk< uncomment to dump all loaded functions
   return status;
 }
 
