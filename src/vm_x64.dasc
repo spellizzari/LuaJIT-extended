@@ -3646,9 +3646,11 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  mov [BASE+RA*8], TAB:RC
     |  ins_next
     |3:
+    |  mov r12, TMPR // r12 is callee save
     |  mov L:CARG1, L:RB
     |  call extern lj_gc_step_fixtop	// (lua_State *L)
     |  movzx RDd, PC_RD			// Need to reload RD.
+    |  mov TMPR, r12
     |  jmp <2
     break;
 

@@ -56,10 +56,10 @@
     <None Include="src\jit\v.lua">
       <Filter>jit</Filter>
     </None>
-    <None Include="src\jit\vmdef.lua">
+    <None Include="src\jit\zone.lua">
       <Filter>jit</Filter>
     </None>
-    <None Include="src\jit\zone.lua">
+    <None Include="src\jit\vmdef.lua">
       <Filter>jit</Filter>
     </None>
   </ItemGroup>
