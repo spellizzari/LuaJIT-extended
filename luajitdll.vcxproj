@@ -68,7 +68,7 @@
       <PreprocessorDefinitions>LUA_BUILD_AS_DLL;LUA_USE_ASSERT;_CRT_STDIO_INLINE=__declspec(dllexport)__inline;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAs>Default</CompileAs>
-      <ExceptionHandling>Async</ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -114,7 +114,7 @@ $(SolutionDir)bin\$(Platform)\$(Configuration)\buildvm.exe -m folddef -o lj_fold
       <PreprocessorDefinitions>LUA_BUILD_AS_DLL;_CRT_STDIO_INLINE=__declspec(dllexport)__inline;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAs>Default</CompileAs>
-      <ExceptionHandling>Async</ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
