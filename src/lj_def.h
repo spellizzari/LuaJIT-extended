@@ -63,7 +63,7 @@ typedef unsigned int uintptr_t;
 
 #define LJ_MAX_LINE	LJ_MAX_MEM32	/* Max. source code line number. */
 #define LJ_MAX_XLEVEL	200		/* Max. syntactic nesting level. */
-#define LJ_MAX_BCINS	(1<<26)		/* Max. # of bytecode instructions. */
+#define LJ_MAX_BCINS	(1<<31)		/* Max. # of bytecode instructions. */
 #define LJ_MAX_SLOTS	250		/* Max. # of slots in a Lua func. */
 #define LJ_MAX_LOCVAR	200		/* Max. # of local variables. */
 #define LJ_MAX_UPVAL	60		/* Max. # of upvalues. */
